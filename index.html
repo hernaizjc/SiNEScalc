@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SiNES Calculator · St. Paul's Sinus Centre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --sky:#00aad2; --sky-lt:#1dc0e8; --sky-pale:#e6f7fc;
+      --navy:#003c6e; --navy-lt:#e8f0f8;
+      --white:#ffffff; --off:#f5fafd; --ink:#0d1a2b; --muted:#556a7d;
+      --border:rgba(0,60,110,.1);
+      --sh-sm:0 2px 16px rgba(0,60,110,.07);
+      --sh-md:0 8px 40px rgba(0,60,110,.12);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;scroll-behavior:smooth}
+    body{font-family:"Outfit",sans-serif;background:var(--off);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+    h1,h2,h3{font-family:"Cormorant Garamond",serif;font-weight:400;line-height:1.15}
+    h1{font-size:clamp(1.9rem,3.5vw,2.8rem);letter-spacing:-.02em}
+    h2{font-size:clamp(1.4rem,2.5vw,2.2rem)}
+    p{line-height:1.8;color:var(--muted);font-weight:300}
+    a{color:var(--sky);text-decoration:none;transition:opacity .2s}
+    a:hover{opacity:.75}
+    main{flex:1}
+
+    /* ── HEADER ── */
+    header{
+      position:sticky;top:0;z-index:100;
+      background:var(--white);border-bottom:1px solid var(--border);box-shadow:var(--sh-sm);
+      display:flex;align-items:center;height:68px;padding:0 2rem;gap:1.4rem;
+    }
+    .hdr-logo{height:38px;width:auto;display:block;flex-shrink:0}
+    .hdr-div{width:1px;height:32px;background:var(--border);flex-shrink:0}
+    .hdr-title .ht-main{font-family:"Cormorant Garamond",serif;font-size:1.1rem;font-weight:500;color:var(--navy);display:block;line-height:1.2}
+    .hdr-title .ht-sub{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sky);display:block;margin-top:.1rem}
+    .hdr-spacer{flex:1}
+    .back-link{display:flex;align-items:center;gap:.4rem;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;transition:color .2s;white-space:nowrap}
+    .back-link:hover{color:var(--sky);opacity:1}
+    .blt{display:none}
+    @media(min-width:600px){.blt{display:inline}}
+    .lang-sw{display:flex;border:1.5px solid var(--border);overflow:hidden}
+    .lang-sw button{background:none;border:none;cursor:pointer;padding:.4rem .85rem;font-family:"Outfit",sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:background .2s,color .2s}
+    .lang-sw button.la{background:var(--navy);color:var(--white)}
+    .lang-sw button:first-child{border-right:1.5px solid var(--border)}
+
+    /* ── CONTAINER ── */
+    .container{max-width:1100px;margin:0 auto;padding:3rem 4vw 5rem}
+
+    /* ── INTRO ── */
+    .lang-panel .container{padding-bottom:0}
+    .stag{display:inline-block;font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sky);font-weight:500;margin-bottom:.7rem}
+    .rule{width:36px;height:2.5px;background:var(--sky);margin:1rem 0 1.8rem;border-radius:2px}
+    .intro-grid{display:grid;grid-template-columns:1fr 400px;gap:3rem;align-items:start;margin-bottom:2rem}
+    .intro-text h1{color:var(--navy);margin-bottom:.4rem}
+    .intro-text p{font-size:.92rem;margin-bottom:.9rem}
+    .intro-bullets{list-style:none;margin:.6rem 0 1.2rem;padding:0}
+    .intro-bullets li{display:flex;align-items:flex-start;gap:.65rem;font-size:.87rem;color:var(--muted);font-weight:300;line-height:1.65;padding:.3rem 0}
+    .intro-bullets li::before{content:"";width:6px;height:6px;background:var(--sky);border-radius:50%;flex-shrink:0;margin-top:.55rem}
+    .formula-box{display:inline-block;margin-top:.8rem;padding:.55rem 1.1rem;background:var(--sky-pale);border-left:3px solid var(--sky);font-size:.8rem;color:var(--navy)}
+    .collab-note{margin-top:1rem;padding:.7rem 1rem;background:var(--navy-lt);border-left:3px solid var(--sky);font-size:.8rem;color:var(--navy);line-height:1.65}
+    .collab-note strong{font-weight:600}
+
+    /* ── VIDEO ── */
+    .video-panel{background:var(--white);border:1px solid var(--border);box-shadow:var(--sh-sm);overflow:hidden}
+    .video-wrap{position:relative;width:100%;padding-bottom:56.25%;background:var(--navy)}
+    .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+    .video-caption{padding:.9rem 1.2rem;border-top:1px solid var(--border)}
+    .video-caption strong{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.3rem}
+    .video-caption p{font-size:.73rem;color:var(--muted);line-height:1.6;margin:0}
+
+    /* ── CALCULATOR CARD ── */
+    .calc-card{background:var(--white);border:1px solid var(--border);box-shadow:var(--sh-md);margin-bottom:2.5rem}
+    .calc-hdr{background:var(--navy);padding:1.3rem 2rem}
+    .calc-hdr h2{color:var(--white);font-family:"Outfit",sans-serif;font-size:1.2rem;font-weight:500;letter-spacing:.02em}
+    .calc-hdr p{font-size:.7rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem}
+    .calc-body{padding:2rem}
+
+    /* ── TABLE ── */
+    .tbl-wrap{overflow-x:auto;margin-bottom:1.8rem}
+    table.st{width:100%;border-collapse:collapse;font-size:.83rem}
+    table.st thead th{padding:.6rem .9rem;text-align:left;font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;color:var(--sky);font-weight:500;border-bottom:2px solid var(--sky);background:var(--white);white-space:nowrap}
+    table.st tbody td{padding:.55rem .9rem;border-bottom:1px solid var(--border);color:var(--navy);background:var(--white)}
+    table.st tbody tr:hover td{background:var(--sky-pale)}
+    table.st tbody tr.row-na td{opacity:.3}
+    table.st tbody tr.row-na td:last-child{opacity:1}
+    table.st td:first-child{font-weight:500;font-size:.79rem;white-space:nowrap}
+    .csel{width:100%;padding:.3rem .4rem;border:1px solid var(--border);background:var(--off);font-family:"Outfit",sans-serif;font-size:.76rem;color:var(--navy);border-radius:0;appearance:none;cursor:pointer}
+    .csel:focus{outline:2px solid var(--sky)}
+    .csel:disabled{opacity:.35;cursor:default}
+    .cchk{width:16px;height:16px;cursor:pointer;accent-color:var(--sky)}
+    .na-note{font-size:.7rem;color:var(--muted);margin-left:.35rem;letter-spacing:.06em}
+
+    /* ── POLYP BLOCK ── */
+    .polyp-block{border:1px solid var(--border);padding:1.2rem 1.4rem;margin-bottom:1.6rem;background:var(--off)}
+    .pb-title{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);font-weight:600;display:block;margin-bottom:1rem}
+    .polyp-opts{display:flex;flex-direction:column;gap:.5rem}
+    .polyp-opts label{display:flex;align-items:flex-start;gap:.75rem;font-size:.85rem;color:var(--ink);cursor:pointer;padding:.5rem .75rem;border:1px solid var(--border);background:var(--white);transition:border-color .2s,background .2s;line-height:1.5}
+    .polyp-opts label:hover{border-color:var(--sky);background:var(--sky-pale)}
+    .polyp-opts input[type="radio"]{accent-color:var(--sky);margin-top:.2rem;flex-shrink:0}
+    .polyp-opts label.polyp-locked{opacity:.38;cursor:not-allowed;pointer-events:none}
+    .pts{font-size:.68rem;color:var(--sky);font-weight:500}
+    .polyp-lock-notice{display:none;margin-top:.8rem;padding:.6rem .9rem;background:var(--sky-pale);border-left:3px solid var(--sky);font-size:.75rem;color:var(--navy);line-height:1.55}
+    .polyp-lock-notice.visible{display:block}
+    .ref-note{margin-top:1.6rem;padding:.85rem 1.1rem;border-left:2px solid var(--sky);background:var(--white);font-size:.69rem;color:var(--muted);line-height:1.65;font-style:italic}
+
+    /* ── RESULT PANEL ── */
+    .sines-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:3rem}
+    .res-panel{background:var(--navy);padding:2rem 1.8rem;position:sticky;top:84px}
+    .rp-title{font-family:"Cormorant Garamond",serif;font-size:1.4rem;color:var(--white);margin-bottom:.2rem}
+    .rp-sub{font-size:.71rem;color:rgba(255,255,255,.4);margin-bottom:1.6rem;line-height:1.55}
+    .score-big{text-align:center;padding:1.3rem 1rem;background:rgba(255,255,255,.05);border:1px solid rgba(0,170,210,.18);margin-bottom:1.3rem}
+    .score-val{font-family:"Cormorant Garamond",serif;font-size:5rem;font-weight:300;line-height:1;color:var(--sky);display:block}
+    .score-max{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.28)}
+    .sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.3rem}
+    .sub-cell{background:rgba(255,255,255,.06);padding:.8rem;text-align:center}
+    .sv{display:block;font-size:1.4rem;font-family:"Cormorant Garamond",serif;color:var(--white)}
+    .sl{display:block;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:.12rem}
+    .sev-bar{margin-bottom:1rem}
+    .sev-labels{display:flex;justify-content:space-between;font-size:.61rem;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.36rem}
+    .sev-track{height:5px;background:rgba(255,255,255,.1);overflow:hidden}
+    .sev-fill{height:100%;background:linear-gradient(90deg,var(--sky),#00d4c8,#4db8ff);transition:width .55s cubic-bezier(.4,0,.2,1)}
+    .sev-text{text-align:center;margin-top:.7rem;font-size:.74rem;letter-spacing:.13em;text-transform:uppercase;font-weight:500;min-height:1.1em}
+    .sev-none{color:#6fcf97}.sev-mild{color:#f2c94c}.sev-moderate{color:#f2994a}.sev-severe{color:#eb5757}
+    .calc-go{width:100%;padding:.9rem;margin-top:.5rem;background:var(--sky);color:var(--white);border:none;cursor:pointer;font-family:"Outfit",sans-serif;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:500;transition:background .2s}
+    .calc-go:hover{background:var(--sky-lt)}
+    .calc-rst{width:100%;padding:.65rem;margin-top:.4rem;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12);cursor:pointer;font-family:"Outfit",sans-serif;font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;transition:.2s}
+    .calc-rst:hover{background:rgba(255,255,255,.13);color:var(--white)}
+
+    /* ── CONVERSIONS ── */
+    .conv-section{margin-top:2.5rem}
+    .conv-section-title{font-family:"Cormorant Garamond",serif;font-size:1.5rem;color:var(--navy);margin-bottom:.3rem}
+    .conv-section-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.8rem;line-height:1.7}
+    .conv-section-sub strong{color:var(--navy);font-weight:500}
+    .conv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+    .conv-card{background:var(--white);border:1px solid var(--border);overflow:hidden}
+    .conv-card-head{padding:.85rem 1.2rem;display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
+    .conv-card-head.mlk{background:var(--navy)}
+    .conv-card-head.nps{background:#1a5276}
+    .conv-card-head.dip{background:#0e4c6e}
+    .conv-card-name{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);font-weight:500}
+    .conv-card-full{font-size:.62rem;color:rgba(255,255,255,.4)}
+    .conv-score-display{padding:1.2rem 1.2rem .6rem;display:flex;align-items:baseline;gap:.4rem}
+    .conv-score-big{font-family:"Cormorant Garamond",serif;font-size:3.4rem;font-weight:300;color:var(--sky);line-height:1}
+    .conv-score-max{font-size:.72rem;color:var(--muted)}
+    .conv-breakdown{padding:.2rem 1.2rem 1.2rem;display:flex;flex-direction:column;gap:.4rem}
+    .conv-row{display:flex;justify-content:space-between;align-items:center;font-size:.76rem;padding:.3rem 0;border-bottom:1px solid var(--border)}
+    .conv-row:last-child{border-bottom:none}
+    .conv-row .cr-label{color:var(--muted)}
+    .conv-row .cr-val{font-weight:600;color:var(--navy);font-size:.82rem;min-width:28px;text-align:right}
+    .conv-nps-grade{padding:1rem 1.2rem 1.4rem}
+    .conv-nps-bar{display:flex;gap:5px;margin:.6rem 0 .5rem}
+    .conv-nps-dot{flex:1;height:8px;background:var(--border);transition:background .4s}
+    .conv-nps-dot.filled{background:var(--sky)}
+    .conv-nps-label{font-size:.73rem;color:var(--navy);font-weight:500}
+    .conv-nps-desc{font-size:.68rem;color:var(--muted);margin-top:.2rem}
+    .conv-est-note{margin:.5rem 1.2rem .8rem;padding:.45rem .7rem;background:var(--sky-pale);font-size:.65rem;color:var(--sky);line-height:1.5;display:flex;gap:.4rem;align-items:flex-start}
+    .conv-na{padding:1.5rem 1.2rem;text-align:center;font-size:.78rem;color:var(--muted)}
+
+    /* ── REFERENCE ── */
+    .ref-wrap{background:var(--white);border:1px solid var(--border);padding:1.8rem 2rem;margin-bottom:3rem}
+    .ref-wrap h3{font-family:"Outfit",sans-serif;font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:600;margin-bottom:1rem}
+    .ref-cite{font-size:.82rem;color:var(--muted);line-height:1.8;padding:1rem 1.2rem;background:var(--off);border-left:3px solid var(--sky);margin-bottom:1.2rem}
+    .ref-cite em{font-style:italic}
+    .ref-note-sub{font-size:.8rem;color:var(--muted);font-weight:300;margin-bottom:1.2rem;line-height:1.7}
+    .btn-paper{display:inline-flex;align-items:center;gap:.55rem;padding:.65rem 1.4rem;background:var(--sky);color:var(--white);font-family:"Outfit",sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;transition:background .2s,transform .1s}
+    .btn-paper:hover{background:var(--navy);opacity:1;transform:translateY(-1px)}
+
+    /* ── FOOTER ── */
+    footer{background:var(--navy);color:rgba(255,255,255,.4);text-align:center;padding:1.2rem 2rem;font-size:.68rem;letter-spacing:.08em;margin-top:auto}
+    footer a{color:rgba(255,255,255,.7)}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px){
+      .intro-grid{grid-template-columns:1fr}
+      .video-panel{order:-1}
+      .sines-layout{grid-template-columns:1fr}
+      .conv-grid{grid-template-columns:1fr}
+      .res-panel{position:static}
+    }
+    @media(max-width:600px){
+      header{padding:0 1rem;gap:.8rem}
+      .calc-body{padding:1.2rem}
+      .hdr-logo{height:30px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header>
+  <a href="../index.html" class="back-link" title="Back to main site">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="blt">Back to site</span>
+  </a>
+  <img src="stpauls-logo.webp" alt="St. Paul's Sinus Centre" class="hdr-logo"/>
+  <div class="hdr-div"></div>
+  <div class="hdr-title">
+    <span class="ht-main" id="hdr-main">SiNES Calculator</span>
+    <span class="ht-sub"  id="hdr-sub">SiNonasal Endoscopic Score</span>
+  </div>
+  <div class="hdr-spacer"></div>
+  <div class="lang-sw">
+    <button id="btn-en" class="la" onclick="setLang('en')">EN</button>
+    <button id="btn-es"             onclick="setLang('es')">ES</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ══ ENGLISH INTRO ══════════════════════════════════════ -->
+<div id="panel-en">
+  <div class="container">
+    <div class="intro-grid">
+      <div class="intro-text">
+        <span class="stag">Validated Clinical Tool</span>
+        <h1>SiNonasal<br/>Endoscopic Score</h1>
+        <div class="rule"></div>
+        <p>The <strong>SiNES</strong> (SiNonasal Endoscopic Score) is a validated, objective
+        grading system developed at <strong>St. Paul's Sinus Centre</strong> (Vancouver, BC) in
+        collaboration with surgeons from <strong>King Saud University</strong>, to standardise
+        the endoscopic assessment of sinonasal inflammation in chronic rhinosinusitis (CRS).
+        It evaluates five anatomical sites across three subdomains — edema, discharge, and
+        scarring — plus nasal polyp extension.</p>
+        <ul class="intro-bullets">
+          <li><strong>5 anatomical sites</strong> — olfactory cleft, frontal, ethmoid, sphenoid, and maxillary sinus</li>
+          <li><strong>3 subdomains per site</strong> — edema (0–4), discharge (0–3), scarring (0–1)</li>
+          <li><strong>Polyp extension</strong> graded 0–III for the entire nasal cavity</li>
+          <li>Validated against SNOT-22, MLK, NPS, and DIP scoring systems</li>
+          <li>Sensitive to change — ideal for pre- and post-operative follow-up</li>
+        </ul>
+        <div class="formula-box">TOTAL SiNES = Edema<sub>mean</sub> + Discharge<sub>mean</sub> + Scarring<sub>mean</sub> + Polyp Extension</div>
+        <div class="collab-note">
+          Developed at <strong>St. Paul's Sinus Centre</strong>, Vancouver, in collaboration with
+          surgeons from <strong>King Saud University</strong>, Riyadh. Published in <em>Rhinology</em>, 2024.
+        </div>
+      </div>
+      <div class="video-panel">
+        <div class="video-wrap">
+          <iframe src="https://www.youtube.com/embed/HS9_WNr_pNg"
+            title="How to use the SiNES system"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen loading="lazy"></iframe>
+        </div>
+        <div class="video-caption">
+          <strong>Instructional Video</strong>
+          <p>A practical walkthrough of the SiNES scoring during a standard sinonasal endoscopy, by St. Paul's Sinus Centre.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SPANISH INTRO ═══════════════════════════════════════ -->
+<div id="panel-es" style="display:none">
+  <div class="container">
+    <div class="intro-grid">
+      <div class="intro-text">
+        <span class="stag">Herramienta Clínica Validada</span>
+        <h1>Puntuación Endoscópica<br/>Rinosinusal</h1>
+        <div class="rule"></div>
+        <p>El <strong>SiNES</strong> (SiNonasal Endoscopic Score) es un sistema de gradación
+        endoscópica objetivo y validado, desarrollado en el <strong>St. Paul's Sinus Centre</strong>
+        (Vancouver, BC) en colaboración con cirujanos de la <strong>Universidad Rey Saud</strong>,
+        para estandarizar la evaluación de la inflamación rinosinusal en la rinosinusitis crónica (RSC).
+        Evalúa cinco sitios anatómicos en tres subdominios inflamatorios más la extensión de los pólipos
+        nasales.</p>
+        <ul class="intro-bullets">
+          <li><strong>5 sitios anatómicos</strong> — surco olfatorio, senos frontal, etmoidal, esfenoidal y maxilar</li>
+          <li><strong>3 subdominios por sitio</strong> — edema (0–4), secreción (0–3), cicatrices (0–1)</li>
+          <li><strong>Extensión de pólipos</strong> gradada de 0 a III para toda la cavidad nasal</li>
+          <li>Validado frente al SNOT-22, MLK, NPS y sistemas de puntuación DIP</li>
+          <li>Sensible al cambio — ideal para seguimiento pre y postoperatorio</li>
+        </ul>
+        <div class="formula-box">TOTAL SiNES = Edema<sub>media</sub> + Secreción<sub>media</sub> + Cicatrices<sub>media</sub> + Extensión de Pólipos</div>
+        <div class="collab-note">
+          Desarrollado en el <strong>St. Paul's Sinus Centre</strong>, Vancouver, en colaboración con
+          cirujanos de la <strong>Universidad Rey Saud</strong>, Riad. Publicado en <em>Rhinology</em>, 2024.
+        </div>
+      </div>
+      <div class="video-panel">
+        <div class="video-wrap">
+          <iframe src="https://www.youtube.com/embed/HS9_WNr_pNg"
+            title="Cómo usar el sistema SiNES"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen loading="lazy"></iframe>
+        </div>
+        <div class="video-caption">
+          <strong>Video Instructivo</strong>
+          <p>Explicación práctica de la puntuación SiNES durante una endoscopia rinosinusal estándar, por St. Paul's Sinus Centre.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CALCULATOR ══════════════════════════════════════════ -->
+<div class="container" style="padding-top:0">
+
+  <div class="calc-card">
+    <div class="calc-hdr">
+      <h2 id="calc-title">SiNES Calculator</h2>
+      <p  id="calc-sub">Score each accessible anatomical site · mark inaccessible sites as N/A</p>
+    </div>
+    <div class="calc-body">
+      <div class="sines-layout">
+
+        <!-- TABLE + POLYP -->
+        <div>
+          <div class="tbl-wrap">
+            <table class="st">
+              <thead>
+                <tr>
+                  <th id="th-site">Anatomical Site</th>
+                  <th id="th-edema">Edema (0–4)</th>
+                  <th id="th-disc">Discharge (0–3)</th>
+                  <th id="th-scar">Scarring (0–1)</th>
+                  <th>N/A</th>
+                </tr>
+              </thead>
+              <tbody id="calcBody"></tbody>
+            </table>
+          </div>
+
+          <div class="polyp-block">
+            <span class="pb-title" id="polyp-title">Nasal polyp extension — entire nasal cavity</span>
+            <div class="polyp-opts">
+              <label id="polyp-label-0">
+                <input checked name="polyp" type="radio" value="0"/>
+                <span id="polyp-text-0">Level 0 <span class="pts">(+0)</span> — Small polyps not reaching the lower border of the middle turbinate</span>
+              </label>
+              <label id="polyp-label-1">
+                <input name="polyp" type="radio" value="1"/>
+                <span id="polyp-text-1">Level I <span class="pts">(+1)</span> — Reaching the lower border of the middle turbinate</span>
+              </label>
+              <label id="polyp-label-2">
+                <input name="polyp" type="radio" value="2"/>
+                <span id="polyp-text-2">Level II <span class="pts">(+2)</span> — Reaching the lower border of the inferior turbinate</span>
+              </label>
+              <label id="polyp-label-3">
+                <input name="polyp" type="radio" value="3"/>
+                <span id="polyp-text-3">Level III <span class="pts">(+3)</span> — Causing complete obstruction of the nasal cavity</span>
+              </label>
+            </div>
+            <div class="polyp-lock-notice" id="polypLockNotice">
+              <span id="polyp-lock-txt">⚠ Levels I–III require at least one site with edema grade 4 (fully formed polyps).</span>
+            </div>
+          </div>
+
+          <div class="ref-note">
+            Hernaiz-Leonardo JC, et al. "Development and validation of the Sinonasal Endoscopic Score (SiNES)
+            for chronic rhinosinusitis." <em>Rhinology</em> 62:4, 2024.
+            <a href="https://doi.org/10.4193/Rhin23.434" rel="noopener" target="_blank">DOI: 10.4193/Rhin23.434</a>
+          </div>
+        </div>
+
+        <!-- RESULT PANEL -->
+        <div>
+          <div class="res-panel">
+            <div class="rp-title" id="rp-title">SiNES Result</div>
+            <div class="rp-sub"   id="rp-sub">Enter values and press "Calculate".</div>
+            <div class="score-big">
+              <span class="score-val" id="rTotal">—</span>
+              <span class="score-max" id="rp-max">/ max. ~11 pts per side</span>
+            </div>
+            <div class="sub-grid">
+              <div class="sub-cell"><span class="sv" id="rEdema">—</span><span class="sl" id="sl-edema">Edema</span></div>
+              <div class="sub-cell"><span class="sv" id="rDisc">—</span> <span class="sl" id="sl-disc">Discharge</span></div>
+              <div class="sub-cell"><span class="sv" id="rScar">—</span> <span class="sl" id="sl-scar">Scarring</span></div>
+              <div class="sub-cell"><span class="sv" id="rPoly">—</span> <span class="sl" id="sl-poly">Polyps</span></div>
+            </div>
+            <div class="sev-bar">
+              <div class="sev-labels">
+                <span id="sev-l">No inflammation</span>
+                <span id="sev-r">Severe</span>
+              </div>
+              <div class="sev-track"><div class="sev-fill" id="sevFill" style="width:0%"></div></div>
+              <div class="sev-text" id="sevText"></div>
+            </div>
+            <button class="calc-go" id="btn-calc" onclick="calcSiNES()">
+              <span id="calc-go-txt">Calculate SiNES</span>
+            </button>
+            <button class="calc-rst" id="btn-reset" onclick="resetSiNES()">
+              <span id="calc-rst-txt">Reset</span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /.sines-layout -->
+
+      <!-- CONVERSIONS -->
+      <div class="conv-section" id="conversionSection" style="display:none">
+        <h3 class="conv-section-title" id="conv-title">Conversion to other scoring systems</h3>
+        <p class="conv-section-sub" id="conv-sub">
+          Based on the equivalency table from the SiNES validation paper (Hernaiz-Leonardo et al.,
+          <em>Rhinology</em> 2024). <strong>Note: the highest score across the five evaluated sites is used for conversion.</strong>
+        </p>
+        <div class="conv-grid">
+          <div class="conv-card">
+            <div class="conv-card-head mlk"><span class="conv-card-name">MLK</span><span class="conv-card-full">Modified Lund-Kennedy</span></div>
+            <div id="mlk-content"><div class="conv-na">—</div></div>
+          </div>
+          <div class="conv-card">
+            <div class="conv-card-head nps"><span class="conv-card-name">NPS</span><span class="conv-card-full">Nasal Polyp Score</span></div>
+            <div id="nps-content"><div class="conv-na">—</div></div>
+          </div>
+          <div class="conv-card">
+            <div class="conv-card-head dip"><span class="conv-card-name">DIP</span><span class="conv-card-full">Discharge, Inflammation &amp; Polyps</span></div>
+            <div id="dip-content"><div class="conv-na">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.calc-body -->
+  </div><!-- /.calc-card -->
+
+  <!-- ══ REFERENCE ══════════════════════════════════════════ -->
+  <div class="ref-wrap">
+    <h3 id="ref-title">Reference</h3>
+    <div class="ref-cite">
+      Hernaiz-Leonardo JC, et al.
+      <em>"Development and validation of the Sinonasal Endoscopic Score (SiNES) for chronic rhinosinusitis."</em>
+      <em>Rhinology</em> 62(4), 2024.
+      DOI: <a href="https://doi.org/10.4193/Rhin23.434" target="_blank" rel="noopener">10.4193/Rhin23.434</a>
+    </div>
+    <p class="ref-note-sub" id="ref-note-sub">
+      The SiNES was developed at St. Paul's Sinus Centre, Vancouver, Canada, in collaboration with
+      surgeons from King Saud University, Riyadh. Please cite the original publication when using
+      this tool in clinical or academic work.
+    </p>
+    <a href="https://doi.org/10.4193/Rhin23.434" target="_blank" rel="noopener" class="btn-paper">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 11h10M7 2v7M4 6l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span id="btn-paper-txt">Download / View Original Paper</span>
+    </a>
+  </div>
+
+</div><!-- /.container -->
+</main>
+
+<footer>
+  <span id="footer-txt">SiNES Calculator &middot; St. Paul's Sinus Centre, Vancouver, Canada &middot;
+    <a href="https://doi.org/10.4193/Rhin23.434" target="_blank">Rhinology 2024</a> &middot;
+    For clinical &amp; research use only</span>
+</footer>
+
+<script>
+/* =====================================================
+   DATA
+===================================================== */
+var LANG = 'en';
+
+var sitesData = {
+  en: ['Olfactory cleft (OC)', 'Frontal sinus', 'Ethmoid sinus', 'Sphenoid sinus', 'Maxillary sinus'],
+  es: ['Surco olfatorio (OC)', 'Seno frontal', 'Seno etmoidal', 'Seno esfenoidal', 'Seno maxilar']
+};
+var edemaOpts = {
+  en: ['0 — No edema', '1 — Mild edema', '2 — Moderate / severe', '3 — Polypoid edema', '4 — Fully formed polyps'],
+  es: ['0 — Sin edema', '1 — Edema leve', '2 — Moderado / severo', '3 — Polipoide', '4 — Pólipos formados']
+};
+var discOpts = {
+  en: ['0 — No discharge', '1 — Clear secretion', '2 — Mild pus / mucin', '3 — Mod-severe pus / mucin'],
+  es: ['0 — Sin secreción', '1 — Secreción clara', '2 — Pus leve / mucina', '3 — Pus / mucina mod-severo']
+};
+var scarOpts = {
+  en: ['0 — No', '1 — Yes'],
+  es: ['0 — No', '1 — Sí']
+};
+var keys = ['oc', 'frontal', 'ethmoid', 'sphenoid', 'maxillary'];
+
+/* =====================================================
+   BUILD TABLE
+===================================================== */
+function buildTable(lang) {
+  var tbody = document.getElementById('calcBody');
+  tbody.innerHTML = '';
+  keys.forEach(function(key, i) {
+    var eOpts = edemaOpts[lang].map(function(t, j) {
+      return '<option value="' + j + '">' + t + '</option>';
+    }).join('');
+    var dOpts = discOpts[lang].map(function(t, j) {
+      return '<option value="' + j + '">' + t + '</option>';
+    }).join('');
+    var sOpts = scarOpts[lang].map(function(t, j) {
+      return '<option value="' + j + '">' + t + '</option>';
+    }).join('');
+
+    var tr = document.createElement('tr');
+    tr.id = 'row-' + key;
+    tr.innerHTML =
+      '<td>' + sitesData[lang][i] + '</td>' +
+      '<td><select class="csel" id="e-' + key + '" oninput="validatePolyp()">' + eOpts + '</select></td>' +
+      '<td><select class="csel" id="d-' + key + '">' + dOpts + '</select></td>' +
+      '<td><select class="csel" id="s-' + key + '">' + sOpts + '</select></td>' +
+      '<td><input type="checkbox" class="cchk" id="na-' + key + '" onchange="toggleNA(\'' + key + '\')"/>' +
+      '<span class="na-note">N/A</span></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* =====================================================
+   TOGGLE N/A
+===================================================== */
+function toggleNA(k) {
+  var na = document.getElementById('na-' + k).checked;
+  document.getElementById('row-' + k).classList.toggle('row-na', na);
+  ['e-' + k, 'd-' + k, 's-' + k].forEach(function(id) {
+    document.getElementById(id).disabled = na;
+  });
+  validatePolyp();
+}
+
+/* =====================================================
+   POLYP VALIDATION
+===================================================== */
+function validatePolyp() {
+  var anyPolyp = keys.some(function(k) {
+    var naEl = document.getElementById('na-' + k);
+    var eEl  = document.getElementById('e-' + k);
+    return naEl && !naEl.checked && eEl && +eEl.value === 4;
+  });
+  var notice = document.getElementById('polypLockNotice');
+  [1, 2, 3].forEach(function(v) {
+    var lbl   = document.getElementById('polyp-label-' + v);
+    var radio = lbl ? lbl.querySelector('input[type="radio"]') : null;
+    if (!lbl || !radio) return;
+    if (anyPolyp) {
+      lbl.classList.remove('polyp-locked');
+      radio.disabled = false;
+    } else {
+      lbl.classList.add('polyp-locked');
+      radio.disabled = true;
+      if (radio.checked) {
+        radio.checked = false;
+        document.querySelector('input[name="polyp"][value="0"]').checked = true;
+      }
+    }
+  });
+  if (notice) notice.classList.toggle('visible', !anyPolyp);
+}
+
+/* =====================================================
+   CALCULATE
+===================================================== */
+function calcSiNES() {
+  var lang = LANG;
+  var e = [], d = [], s = [];
+  keys.forEach(function(k) {
+    if (!document.getElementById('na-' + k).checked) {
+      e.push(+document.getElementById('e-' + k).value);
+      d.push(+document.getElementById('d-' + k).value);
+      s.push(+document.getElementById('s-' + k).value);
+    }
+  });
+  if (!e.length) {
+    alert(lang === 'en' ? 'All sites are marked as N/A.' : 'Todos los sitios están marcados como N/A.');
+    return;
+  }
+  function mean(a) { return a.reduce(function(x, y) { return x + y; }, 0) / a.length; }
+  var polyp = +document.querySelector('input[name="polyp"]:checked').value;
+  var em = mean(e), dm = mean(d), sm = mean(s), total = em + dm + sm + polyp;
+
+  document.getElementById('rTotal').textContent = total.toFixed(1);
+  document.getElementById('rEdema').textContent = em.toFixed(2);
+  document.getElementById('rDisc').textContent  = dm.toFixed(2);
+  document.getElementById('rScar').textContent  = sm.toFixed(2);
+  document.getElementById('rPoly').textContent  = polyp;
+  document.getElementById('sevFill').style.width = Math.min(total / 11 * 100, 100) + '%';
+
+  var sevLabels = {
+    en: ['No significant inflammation', 'Mild inflammation', 'Moderate inflammation', 'Severe inflammation'],
+    es: ['Sin inflamación significativa', 'Inflamación leve', 'Inflamación moderada', 'Inflamación severa']
+  };
+  var classes = ['sev-none', 'sev-mild', 'sev-moderate', 'sev-severe'];
+  var idx = total < 2 ? 0 : total < 4 ? 1 : total < 7 ? 2 : 3;
+  var lbl = document.getElementById('sevText');
+  lbl.textContent = sevLabels[lang][idx];
+  lbl.className = 'sev-text ' + classes[idx];
+
+  renderConversions(e, d, polyp, lang);
+}
+
+/* =====================================================
+   CONVERSIONS
+===================================================== */
+function renderConversions(eVals, dVals, polyp, lang) {
+  var maxE = Math.max.apply(null, eVals);
+  var maxD = Math.max.apply(null, dVals);
+
+  // MLK
+  var mlkEdemaMap = [0, 1, 2, 2, 2];
+  var mlkDiscMap  = [0, 1, 2, 2];
+  var mlkE = mlkEdemaMap[maxE];
+  var mlkD = mlkDiscMap[maxD];
+  var mlkP = (polyp === 0 && maxE < 4) ? 0 : (polyp === 0 && maxE >= 4) ? 1 : 2;
+  var mlkTotal = mlkE + mlkD + mlkP;
+  var mlkEL = {en:['Absent','Mild','Severe'],           es:['Ausente','Leve','Severo']};
+  var mlkDL = {en:['No discharge','Clear/thin','Thick/purulent'], es:['Sin secreción','Clara/delgada','Gruesa/purulenta']};
+  var mlkPL = {en:['Absent','Within middle meatus','Beyond middle meatus'], es:['Ausente','Dentro del meato medio','Más allá del meato medio']};
+  document.getElementById('mlk-content').innerHTML =
+    '<div class="conv-score-display"><span class="conv-score-big">' + mlkTotal + '</span><span class="conv-score-max">/ 6</span></div>' +
+    '<div class="conv-breakdown">' +
+    '<div class="conv-row"><span class="cr-label">Edema</span><span class="cr-val">' + mlkE + ' <small style="font-weight:300;font-size:.68rem;color:var(--muted)">' + mlkEL[lang][mlkE] + '</small></span></div>' +
+    '<div class="conv-row"><span class="cr-label">' + (lang==='es'?'Secreción':'Discharge') + '</span><span class="cr-val">' + mlkD + ' <small style="font-weight:300;font-size:.68rem;color:var(--muted)">' + mlkDL[lang][mlkD] + '</small></span></div>' +
+    '<div class="conv-row"><span class="cr-label">' + (lang==='es'?'Pólipos':'Polyps') + '</span><span class="cr-val">' + mlkP + ' <small style="font-weight:300;font-size:.68rem;color:var(--muted)">' + mlkPL[lang][mlkP] + '</small></span></div>' +
+    '</div>';
+
+  // NPS
+  var npsGrade = (polyp === 0 && maxE < 4) ? 0 : (polyp === 0 && maxE >= 4) ? 1 : polyp + 1;
+  var npsD = {
+    en: ['No polyps','Small polyps in middle meatus','Polyps reaching lower border of middle turbinate','Polyps reaching lower border of inferior turbinate','Polyps causing complete nasal obstruction'],
+    es: ['Sin pólipos','Pólipos pequeños en el meato medio','Pólipos que alcanzan el borde inferior del cornete medio','Pólipos que alcanzan el borde inferior del cornete inferior','Pólipos que obstruyen completamente la cavidad nasal']
+  };
+  var dots = '';
+  for (var di = 0; di < 4; di++) dots += '<div class="conv-nps-dot' + (di < npsGrade ? ' filled' : '') + '"></div>';
+  document.getElementById('nps-content').innerHTML =
+    '<div class="conv-nps-grade"><div class="conv-score-display" style="padding:1.2rem 0 .4rem">' +
+    '<span class="conv-score-big">' + npsGrade + '</span><span class="conv-score-max">/ 4 &nbsp;(' + (lang==='es'?'Grado':'Grade') + ' ' + npsGrade + ')</span></div>' +
+    '<div class="conv-nps-bar">' + dots + '</div>' +
+    '<div class="conv-nps-label">' + (lang==='es'?'Grado':'Grade') + ' ' + npsGrade + '</div>' +
+    '<div class="conv-nps-desc">' + npsD[lang][npsGrade] + '</div></div>';
+
+  // DIP
+  var dipIM = [0,3,5,10,10], dipDM = [0,5,10,10];
+  var dipI = dipIM[maxE], dipD2 = dipDM[maxD];
+  var dipP = polyp===0 ? dipI : polyp===1 ? 7 : polyp===2 ? 8 : 9;
+  var dipTotal = dipD2 + dipI + dipP;
+  var dipID = {en:['No inflammation','Mild inflammation','Moderate inflammation','Severe inflammation','Severe inflammation'],es:['Sin inflamación','Inflamación leve','Inflamación moderada','Inflamación severa','Inflamación severa']};
+  var dipDD = {en:['No discharge','Thick mucus','Purulent discharge','Purulent discharge'],es:['Sin secreción','Mucus espeso','Secreción purulenta','Secreción purulenta']};
+  var dipPD = polyp===0 ? (lang==='es'?'Igual al score de inflamación (sin pólipos visibles)':'Same as inflammation score (no visible polyps)') : (polyp===1?(lang==='es'?'Pólipos pequeños':'Small polyps'):polyp===2?(lang==='es'?'Pólipos medianos':'Medium polyps'):(lang==='es'?'Pólipos grandes / obstrucción completa':'Large polyps / complete obstruction'));
+  var estNote = lang==='es' ? 'Estimación — el DIP no tiene límites numéricos estrictos. Conversión aproximada según indica la tabla del artículo.' : 'Estimate — DIP lacks strict numeric limits. Conversion is approximate as noted in the paper\'s table.';
+  document.getElementById('dip-content').innerHTML =
+    '<div class="conv-score-display"><span class="conv-score-big">~' + dipTotal + '</span><span class="conv-score-max">/ 30</span></div>' +
+    '<div class="conv-breakdown">' +
+    '<div class="conv-row"><span class="cr-label">' + (lang==='es'?'Inflamación':'Inflammation') + '</span><span class="cr-val">' + dipI + ' <small style="font-weight:300;font-size:.68rem;color:var(--muted)">' + dipID[lang][maxE] + '</small></span></div>' +
+    '<div class="conv-row"><span class="cr-label">' + (lang==='es'?'Secreción':'Discharge') + '</span><span class="cr-val">' + dipD2 + ' <small style="font-weight:300;font-size:.68rem;color:var(--muted)">' + dipDD[lang][maxD] + '</small></span></div>' +
+    '<div class="conv-row"><span class="cr-label">' + (lang==='es'?'Pólipos/Edema':'Polyp/Edema') + '</span><span class="cr-val">' + dipP + ' <small style="font-weight:300;font-size:.68rem;color:var(--muted)">' + dipPD + '</small></span></div>' +
+    '</div><div class="conv-est-note">ⓘ ' + estNote + '</div>';
+
+  document.getElementById('conversionSection').style.display = 'block';
+}
+
+/* =====================================================
+   RESET
+===================================================== */
+function resetSiNES() {
+  keys.forEach(function(k) {
+    document.getElementById('na-' + k).checked = false;
+    document.getElementById('row-' + k).classList.remove('row-na');
+    ['e-' + k, 'd-' + k, 's-' + k].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.value = 0; el.disabled = false; }
+    });
+  });
+  document.querySelector('input[name="polyp"][value="0"]').checked = true;
+  ['rTotal','rEdema','rDisc','rScar','rPoly'].forEach(function(id) {
+    document.getElementById(id).textContent = '—';
+  });
+  document.getElementById('sevFill').style.width = '0%';
+  document.getElementById('sevText').textContent = '';
+  document.getElementById('conversionSection').style.display = 'none';
+  validatePolyp();
+}
+
+/* =====================================================
+   LANGUAGE SWITCH
+===================================================== */
+var strings = {
+  en: {
+    hdrMain:   'SiNES Calculator',
+    hdrSub:    'SiNonasal Endoscopic Score',
+    calcTitle: 'SiNES Calculator',
+    calcSub:   'Score each accessible anatomical site \u00b7 mark inaccessible sites as N/A',
+    thSite:    'Anatomical Site',
+    thEdema:   'Edema (0\u20134)',
+    thDisc:    'Discharge (0\u20133)',
+    thScar:    'Scarring (0\u20131)',
+    polypTitle:'Nasal polyp extension \u2014 entire nasal cavity',
+    polypTexts:[
+      'Level 0 <span class="pts">(+0)</span> \u2014 Small polyps not reaching the lower border of the middle turbinate',
+      'Level I <span class="pts">(+1)</span> \u2014 Reaching the lower border of the middle turbinate',
+      'Level II <span class="pts">(+2)</span> \u2014 Reaching the lower border of the inferior turbinate',
+      'Level III <span class="pts">(+3)</span> \u2014 Causing complete obstruction of the nasal cavity'
+    ],
+    polypLock: '\u26a0 Levels I\u2013III require at least one site with edema grade 4 (fully formed polyps).',
+    rpTitle:   'SiNES Result',
+    rpSub:     'Enter values and press \u201cCalculate\u201d.',
+    rpMax:     '/ max. ~11 pts per side',
+    slEdema:   'Edema',   slDisc:  'Discharge', slScar: 'Scarring', slPoly: 'Polyps',
+    sevL:      'No inflammation', sevR: 'Severe',
+    btnCalc:   'Calculate SiNES', btnReset: 'Reset',
+    convTitle: 'Conversion to other scoring systems',
+    convSub:   'Based on the equivalency table from the SiNES validation paper (Hernaiz-Leonardo et al., <em>Rhinology</em> 2024). <strong>Note: the highest score across the five evaluated sites is used for conversion.</strong>',
+    refTitle:  'Reference',
+    refSub:    'The SiNES was developed at St. Paul\u2019s Sinus Centre, Vancouver, Canada, in collaboration with surgeons from King Saud University, Riyadh. Please cite the original publication when using this tool in clinical or academic work.',
+    btnPaper:  'Download / View Original Paper',
+    footer:    'SiNES Calculator &middot; St. Paul\u2019s Sinus Centre, Vancouver, Canada &middot; <a href="https://doi.org/10.4193/Rhin23.434" target="_blank">Rhinology 2024</a> &middot; For clinical &amp; research use only'
+  },
+  es: {
+    hdrMain:   'Calculadora SiNES',
+    hdrSub:    'SiNonasal Endoscopic Score',
+    calcTitle: 'Calculadora SiNES',
+    calcSub:   'Punt\u00fae cada sitio anat\u00f3mico accesible \u00b7 marque como N/A los sitios inaccesibles',
+    thSite:    'Sitio Anat\u00f3mico',
+    thEdema:   'Edema (0\u20134)',
+    thDisc:    'Secreci\u00f3n (0\u20133)',
+    thScar:    'Cicatrices (0\u20131)',
+    polypTitle:'Extensi\u00f3n de p\u00f3lipos nasales \u2014 cavidad nasal completa',
+    polypTexts:[
+      'Nivel 0 <span class="pts">(+0)</span> \u2014 P\u00f3lipos peque\u00f1os que no alcanzan el borde inferior del cornete medio',
+      'Nivel I <span class="pts">(+1)</span> \u2014 Que alcanzan el borde inferior del cornete medio',
+      'Nivel II <span class="pts">(+2)</span> \u2014 Que alcanzan el borde inferior del cornete inferior',
+      'Nivel III <span class="pts">(+3)</span> \u2014 Que causan obstrucci\u00f3n completa de la cavidad nasal'
+    ],
+    polypLock: '\u26a0 Los niveles I\u2013III requieren al menos un sitio con edema grado 4 (p\u00f3lipos formados).',
+    rpTitle:   'Resultado SiNES',
+    rpSub:     'Ingrese los valores y presione \u201cCalcular\u201d.',
+    rpMax:     '/ m\u00e1x. ~11 pts por lado',
+    slEdema:   'Edema',   slDisc:  'Secreci\u00f3n', slScar: 'Cicatrices', slPoly: 'P\u00f3lipos',
+    sevL:      'Sin inflamaci\u00f3n', sevR: 'Severo',
+    btnCalc:   'Calcular SiNES', btnReset: 'Restablecer',
+    convTitle: 'Conversi\u00f3n a otros sistemas de puntuaci\u00f3n',
+    convSub:   'Basado en la tabla de equivalencias del art\u00edculo de validaci\u00f3n del SiNES (Hernaiz-Leonardo et al., <em>Rhinology</em> 2024). <strong>Nota: se utiliza la puntuaci\u00f3n m\u00e1s alta entre los cinco sitios evaluados para la conversi\u00f3n.</strong>',
+    refTitle:  'Referencia',
+    refSub:    'El SiNES fue desarrollado en el St. Paul\u2019s Sinus Centre, Vancouver, Canad\u00e1, en colaboraci\u00f3n con cirujanos de la Universidad Rey Saud, Riad. Por favor cite la publicaci\u00f3n original al utilizar esta herramienta en trabajo cl\u00ednico o acad\u00e9mico.',
+    btnPaper:  'Descargar / Ver Art\u00edculo Original',
+    footer:    'Calculadora SiNES &middot; St. Paul\u2019s Sinus Centre, Vancouver, Canad\u00e1 &middot; <a href="https://doi.org/10.4193/Rhin23.434" target="_blank">Rhinology 2024</a> &middot; Solo para uso cl\u00ednico y de investigaci\u00f3n'
+  }
+};
+
+function applyStrings(lang) {
+  var t = strings[lang];
+  document.getElementById('hdr-main').textContent   = t.hdrMain;
+  document.getElementById('hdr-sub').textContent    = t.hdrSub;
+  document.getElementById('calc-title').textContent = t.calcTitle;
+  document.getElementById('calc-sub').textContent   = t.calcSub;
+  document.getElementById('th-site').textContent    = t.thSite;
+  document.getElementById('th-edema').textContent   = t.thEdema;
+  document.getElementById('th-disc').textContent    = t.thDisc;
+  document.getElementById('th-scar').textContent    = t.thScar;
+  document.getElementById('polyp-title').textContent = t.polypTitle;
+  t.polypTexts.forEach(function(txt, i) {
+    document.getElementById('polyp-text-' + i).innerHTML = txt;
+  });
+  document.getElementById('polyp-lock-txt').textContent = t.polypLock;
+  document.getElementById('rp-title').textContent   = t.rpTitle;
+  document.getElementById('rp-sub').textContent     = t.rpSub;
+  document.getElementById('rp-max').textContent     = t.rpMax;
+  document.getElementById('sl-edema').textContent   = t.slEdema;
+  document.getElementById('sl-disc').textContent    = t.slDisc;
+  document.getElementById('sl-scar').textContent    = t.slScar;
+  document.getElementById('sl-poly').textContent    = t.slPoly;
+  document.getElementById('sev-l').textContent      = t.sevL;
+  document.getElementById('sev-r').textContent      = t.sevR;
+  document.getElementById('calc-go-txt').textContent  = t.btnCalc;
+  document.getElementById('calc-rst-txt').textContent = t.btnReset;
+  document.getElementById('conv-title').textContent = t.convTitle;
+  document.getElementById('conv-sub').innerHTML     = t.convSub;
+  document.getElementById('ref-title').textContent  = t.refTitle;
+  document.getElementById('ref-note-sub').textContent = t.refSub;
+  document.getElementById('btn-paper-txt').textContent = t.btnPaper;
+  document.getElementById('footer-txt').innerHTML   = t.footer;
+  document.getElementById('panel-en').style.display = lang === 'en' ? '' : 'none';
+  document.getElementById('panel-es').style.display = lang === 'es' ? '' : 'none';
+  document.getElementById('btn-en').classList.toggle('la', lang === 'en');
+  document.getElementById('btn-es').classList.toggle('la', lang === 'es');
+  document.documentElement.lang = lang;
+}
+
+function setLang(lang) {
+  LANG = lang;
+  applyStrings(lang);
+  buildTable(lang);
+  ['rTotal','rEdema','rDisc','rScar','rPoly'].forEach(function(id){
+    document.getElementById(id).textContent = '—';
+  });
+  document.getElementById('sevFill').style.width = '0%';
+  document.getElementById('sevText').textContent = '';
+  document.getElementById('conversionSection').style.display = 'none';
+  validatePolyp();
+}
+
+/* =====================================================
+   INIT
+===================================================== */
+(function() {
+  var nav = (navigator.language || 'en').toLowerCase();
+  var lang = nav.startsWith('es') ? 'es' : 'en';
+  LANG = lang;
+  buildTable(lang);
+  applyStrings(lang);
+  validatePolyp();
+})();
+</script>
+</body>
+</html>
